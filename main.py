@@ -1,5 +1,4 @@
 from tqdm import tqdm
-from urllib3.filepost import writer
 
 from modules.db_adapter import DBAdapter
 from modules.embedder import Embedder
