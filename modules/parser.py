@@ -1,4 +1,5 @@
 import re
+import os
 import pandas as pd
 from typing import List
 from langchain_core.documents import Document
@@ -6,6 +7,11 @@ from langchain.document_loaders import DataFrameLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 class Parser:
+
+    def __init__(self, path):
+        self.questions_path = os.path.join(path, 'questions_clean.csv')
+        self.websites_path = os.path.join(path, 'websites.csv')
+
     def _clean_page_content(self, page_title: str, page_content: str) -> str:
         
         def preprocess_content(content):
@@ -101,7 +107,7 @@ class Parser:
         return smart_line_filter(preprocessed)
 
     def parse_train(self) -> List[Document]:
-        df_websites = pd.read_csv('res/websites.csv')
+        df_websites = pd.read_csv(self.websites_path)
         
         df_websites['text'] = df_websites.apply(
             lambda row: self._clean_page_content(row['title'], row['text']), 
@@ -116,5 +122,7 @@ class Parser:
         
         return texts
 
-    def parse_questions(self):
-        return []
+    def parse_questions(self) -> List[List]:
+        df_questions = pd.read_csv(self.questions_path)
+        questions_list = [[q_id, query] for q_id, query in zip(df_questions['q_id'], df_questions['query'])]
+        return questions_list
