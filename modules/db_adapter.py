@@ -16,5 +16,11 @@ class DBAdapter:
         self.db.add_documents(documents=documents)
 
     def search_in_db(self, query, top_k: int = 5):
-        results = self.db.similarity_search(query, k=top_k)
+        docs_with_scores = self.db.similarity_search_with_score(query, k=top_k)
+
+        results = []
+        for doc, score in docs_with_scores:
+            doc.metadata["distance"] = score
+            results.append(doc)
+
         return results
