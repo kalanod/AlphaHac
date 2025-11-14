@@ -7,7 +7,7 @@ from modules.parser import Parser
 from modules.reranker import Reranker
 from modules.writer import Writer
 
-parser = Parser()
+parser = Parser(path='..\\data')
 embedder = Embedder()
 llm_adapter = LLMAdapter()
 db_adapter = DBAdapter(embedder.get_embedder())
