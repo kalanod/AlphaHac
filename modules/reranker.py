@@ -20,6 +20,8 @@ class Reranker:
             distance = doc.metadata.get('distance', float('inf'))
 
             doc_embeddings = self._extract_doc_embeddings(doc)
+            if doc_embeddings is None:
+                continue
             similarity = self._calculate_question_similarity(question, doc_embeddings)
             
             doc_info.append({
@@ -44,14 +46,14 @@ class Reranker:
     
     def _extract_doc_embeddings(self, doc) -> np.ndarray:
 
-        # Вариант 1: Эмбединги в page_content 
-        if hasattr(doc.page_content, '__iter__') and not isinstance(doc.page_content, str):
+        if hasattr(doc, 'embeddings') and doc.embeddings is not None:
+            return np.array(doc.embeddings)
+        elif hasattr(doc, 'page_content') and hasattr(doc.page_content, '__iter__') and not isinstance(doc.page_content, str):
             return np.array(doc.page_content)
-        
-        # Вариант 2: Эмбединги в metadata
-        embeddings = doc.metadata.get('embeddings')
-        if embeddings is not None:
-            return np.array(embeddings)
+        elif hasattr(doc, 'metadata') and 'embeddings' in doc.metadata:
+            return np.array(doc.metadata['embeddings'])
+        else:
+            return None
     
     def _calculate_question_similarity(self, question: np.ndarray, doc_embeddings: np.ndarray) -> float:
 

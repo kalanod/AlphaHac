@@ -94,8 +94,3 @@ class LLMAdapter:
         words = text.split()
         filtered_words = [word for word in words if word not in self.stop_words]
         return ' '.join(filtered_words)
-
-
-
-    #def normalize(self, question):
-    #    pass

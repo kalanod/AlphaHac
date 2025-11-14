@@ -23,7 +23,7 @@ if __name__ == '__main__':
     for question in tqdm(questions):
         question = llm_adapter.normalize(question)
         similar_docs = db_adapter.search_in_db(question)
-        answer = reranker.rerank_docs(similar_docs, questions)
+        answer = reranker.rerank_docs(similar_docs, question)
         answers.append(answer)
     writer.write_answers(answers)
 
