@@ -10,21 +10,19 @@ from modules.writer import Writer
 parser = Parser()
 embedder = Embedder()
 llm_adapter = LLMAdapter()
-db_adapter = DBAdapter()
+db_adapter = DBAdapter(embedder.get_embedder())
 reranker = Reranker()
 writer = Writer()
 
 
 if __name__ == '__main__':
     documents = parser.parse_train()
-    embeddings = embedder.embedd_docs(documents)
-    db_adapter.save_to_db(documents, embeddings)
+    db_adapter.save_to_db(documents)
     questions = parser.parse_questions()
     answers = []
     for question in tqdm(questions):
         question = llm_adapter.normalize(question)
-        embedded_question = embedder.embedd_query(question)
-        similar_docs = db_adapter.search_in_db(embedded_question)
+        similar_docs = db_adapter.search_in_db(question)
         answer = reranker.rerank_docs(similar_docs, questions)
         answers.append(answer)
     writer.write_answers(answers)

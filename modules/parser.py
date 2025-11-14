@@ -101,7 +101,7 @@ class Parser:
         return smart_line_filter(preprocessed)
 
     def parse_train(self) -> List[Document]:
-        df_websites = pd.read_csv('..\\data\\websites.csv')
+        df_websites = pd.read_csv('res/websites.csv')
         
         df_websites['text'] = df_websites.apply(
             lambda row: self._clean_page_content(row['title'], row['text']), 
