@@ -5,10 +5,7 @@ class Writer:
         
     def write_answers(self, answers):
         with open(self.filename, mode="w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f, delimiter='\t')  
-            writer.writerow(["q_id", "web_list"])  
-            for idx, answer in enumerate(answers, start=1):
-                web_list_str = str(answer)
-                writer.writerow([idx, web_list_str])
-
-        pass
+            writer = csv.writer(f, delimiter='\t')
+            writer.writerow(["q_id", "web_list"])
+            for q_id, web_list in answers:
+                writer.writerow([q_id, str(web_list)])
