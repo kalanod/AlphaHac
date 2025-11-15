@@ -1,3 +1,4 @@
+import csv
 class Writer:
     def __init__(self, filename="alfahack_results.csv"):
         self.filename = filename
