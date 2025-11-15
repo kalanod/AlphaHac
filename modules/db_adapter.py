@@ -13,7 +13,13 @@ class DBAdapter:
         )
 
     def save_to_db(self, documents: List[Document]):
-        self.db.add_documents(documents=documents)
+        if not documents:
+            return
+
+        batch_size = 5000
+        for start in range(0, len(documents), batch_size):
+            batch = documents[start : start + batch_size]
+            self.db.add_documents(documents=batch)
 
     def search_in_db(self, query, top_k: int = 5):
         docs_with_scores = self.db.similarity_search_with_score(query, k=top_k)
