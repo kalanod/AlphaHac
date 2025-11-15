@@ -1,47 +1,53 @@
 import numpy as np
-from typing import List
+from typing import List, Optional
 from langchain_core.documents import Document
 
 
 class Reranker:
     def __init__(self, method = "distance"):
         self.method = method
-    
-    def rerank_docs(self, similar_docs: List[Document], question: np.ndarray) -> List[int]:
+
+    def rerank_docs(self, similar_docs: List[Document], question: Optional[np.ndarray] = None) -> List[int]:
 
         if len(similar_docs) == 0:
             return []
         doc_info = []
-        
+
         for doc in similar_docs:
-            doc_id = doc.metadata.get('id')
+            doc_id = (
+                doc.metadata.get('web_id')
+                or doc.metadata.get('id')
+                or doc.metadata.get('source')
+            )
             if doc_id is None:
                 continue
             distance = doc.metadata.get('distance', float('inf'))
 
-            doc_embeddings = self._extract_doc_embeddings(doc)
-            if doc_embeddings is None:
-                continue
-            similarity = self._calculate_question_similarity(question, doc_embeddings)
-            
-            doc_info.append({
+            doc_record = {
                 'id': doc_id,
                 'distance': distance,
-                'similarity': similarity,
-                'doc': doc
-            })
+            }
 
-        if self.method == "distance":
-            ranked_docs = sorted(doc_info, key=lambda x: x['distance'])
-        elif self.method == "similarity":
+            if question is not None:
+                doc_embeddings = self._extract_doc_embeddings(doc)
+                if doc_embeddings is not None:
+                    similarity = self._calculate_question_similarity(question, doc_embeddings)
+                    doc_record['similarity'] = similarity
+
+            doc_info.append(doc_record)
+
+        if not doc_info:
+            return []
+
+        if self.method == "similarity" and all('similarity' in doc for doc in doc_info):
             ranked_docs = sorted(doc_info, key=lambda x: x['similarity'], reverse=True)
-        elif self.method == "hybrid":
+        elif self.method == "hybrid" and all('similarity' in doc for doc in doc_info):
             ranked_docs = self._hybrid_ranking(doc_info)
         else:
             ranked_docs = sorted(doc_info, key=lambda x: x['distance'])
 
         top_5_ids = [doc['id'] for doc in ranked_docs[:5]]
-        
+
         return top_5_ids
     
     def _extract_doc_embeddings(self, doc) -> np.ndarray:

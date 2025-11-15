@@ -20,10 +20,11 @@ if __name__ == '__main__':
     db_adapter.save_to_db(documents)
     questions = parser.parse_questions()
     answers = []
-    for question in tqdm(questions):
-        question = llm_adapter.normalize(question)
-        similar_docs = db_adapter.search_in_db(question)
-        answer = reranker.rerank_docs(similar_docs, question)
-        answers.append(answer)
+    for q_id, raw_query in tqdm(questions):
+        normalized_query = llm_adapter.normalize(raw_query)
+        search_query = normalized_query or raw_query
+        similar_docs = db_adapter.search_in_db(search_query)
+        answer = reranker.rerank_docs(similar_docs)
+        answers.append((q_id, answer))
     writer.write_answers(answers)
 
