@@ -1,7 +1,8 @@
 import re
 import string
 
-from langchain_openai import ChatOpenAI
+import requests
+
 try:
     import pymorphy3
 
@@ -12,12 +13,6 @@ except ImportError:
 
 class LLMAdapter:
     from openai import OpenAI
-
-    llm = ChatOpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key="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",
-        model="openrouter/sherlock-dash-alpha"  # или любая другая модель OpenRouter
-    )
 
     def __init__(self, use_lemmatization=True):
         self.use_lemmatization = use_lemmatization and PYMYORPHY_AVAILABLE
@@ -106,9 +101,9 @@ class LLMAdapter:
         return ' '.join(filtered_words)
 
     def magicWand(self, documents):
-        #тут волшебство
+        # тут волшебство
         for _, document in enumerate(documents):
-            documents[_] = self.llm.invoke(f"""
+            prompt = f"""
             Преобразуй текст WEB страницы в полезное содержимое для RAG.
 Удали всё незначимое: меню, кнопки, навигацию, рекламу, служебные элементы, SEO-текст, повторяющиеся фразы, вводные слова и общие формулировки.
 Оставь только конкретные факты, функции, характеристики, описания услуг, условий, процессов или правил, которые реально могут пригодиться для ответа на вопросы.
@@ -120,6 +115,22 @@ class LLMAdapter:
 {document.metadata.get('title')}
 
 WEB страница:
-{document.page_content}""")
+{document.page_content}"""
+            url = "https://openrouter.ai/api/v1/chat/completions"
+            headers = {
+                "Authorization": "Bearer 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",
+                "HTTP-Referer": "http://localhost",
+                "X-Title": "My App",
+            }
+            data = {
+                "model": "openrouter/sherlock-dash-alpha",  # выбери любую модель
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ]
+            }
+
+            r = requests.post(url, json=data, headers=headers)
+            r.raise_for_status()
+            documents[_].page_content =  r.json()["choices"][0]["message"]["content"]
 
         return documents
