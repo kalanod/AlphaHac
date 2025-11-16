@@ -28,5 +28,4 @@ class Reranker:
             return []
         ranked_docs = sorted(doc_distances, key=lambda x: x[1])
         top_5_ids = [doc_id for doc_id, distance in ranked_docs[:5]]
-        
         return top_5_ids

@@ -24,7 +24,5 @@ if __name__ == '__main__':
         normalized_query = llm_adapter.normalize(raw_query)
         search_query = normalized_query or raw_query
         similar_docs = db_adapter.search_in_db(search_query)
-        answer = reranker.rerank_docs(similar_docs)
-        answers.append((q_id, answer))
+        answers.append((q_id, [i.page_content() for i in similar_docs]))
     writer.write_answers(answers)
-
