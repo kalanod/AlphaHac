@@ -17,6 +17,7 @@ writer = Writer()
 
 if __name__ == '__main__':
     documents = parser.parse_train()
+    documents = llm_adapter.magicWand(documents)
     db_adapter.save_to_db(documents)
     questions = parser.parse_questions()
     answers = []
