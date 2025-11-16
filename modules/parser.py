@@ -279,34 +279,22 @@ class Parser:
     
     def parse_train(self) -> List[Document]:
         df_websites = pd.read_csv(self.websites_path)
-        
         df_websites['cleaned_text'] = df_websites.apply(
             lambda row: self._clean_page_content(row['title'], row['text']), 
             axis=1
         )
-        
         df_websites = df_websites[df_websites['cleaned_text'].str.len() > 50]
-        
         documents = []
         for idx, row in df_websites.iterrows():
             doc = Document(
                 page_content=row['cleaned_text'],
                 metadata={
                     'web_id': row['web_id'], 
-                    'title': row['title'],
-                    'url': row['url']
+                    'title': row['title']
                 }
             )
             documents.append(doc)
-        
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=800, 
-            chunk_overlap=100,
-            separators=['\n\n', '\n', '.', '!', '?', ';', ':', ',', ' ']
-        )
-        texts = text_splitter.split_documents(documents)
-        
-        return texts
+        return documents
     
     def parse_questions(self) -> List[List]:
         df_questions = pd.read_csv(self.questions_path)
