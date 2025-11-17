@@ -21,7 +21,7 @@ class DBAdapter:
             batch = documents[start : start + batch_size]
             self.db.add_documents(documents=batch)
 
-    def search_in_db(self, query, top_k: int = 5):
+    def search_in_db(self, query, top_k: int = 10):
         docs_with_scores = self.db.similarity_search_with_score(query, k=top_k)
 
         results = []
